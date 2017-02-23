@@ -22,6 +22,7 @@ type CodeConfig struct {
 	packageName    string
 	touchTimestamp bool
 	template       string
+	structOnly     bool
 }
 
 func (cc CodeConfig) MustCompileTemplate() *template.Template {
@@ -149,14 +150,17 @@ func generateModel(dbName, tName string, schema drivers.TableSchema, config Code
 	if err := model.GenStruct(w, tmpl); err != nil {
 		return fmt.Errorf("[%s] Fail to gen model struct, %s", tName, err)
 	}
-	if err := model.GenObjectApi(w, tmpl); err != nil {
-		return fmt.Errorf("[%s] Fail to gen model object api, %s", tName, err)
-	}
-	if err := model.GenQueryApi(w, tmpl); err != nil {
-		return fmt.Errorf("[%s] Fail to gen model query api, %s", tName, err)
-	}
-	if err := model.GenManagedObjApi(w, tmpl); err != nil {
-		return fmt.Errorf("[%s] Fail to gen model managed objects api, %s", tName, err)
+
+	if !config.structOnly {
+		if err := model.GenObjectApi(w, tmpl); err != nil {
+			return fmt.Errorf("[%s] Fail to gen model object api, %s", tName, err)
+		}
+		if err := model.GenQueryApi(w, tmpl); err != nil {
+			return fmt.Errorf("[%s] Fail to gen model query api, %s", tName, err)
+		}
+		if err := model.GenManagedObjApi(w, tmpl); err != nil {
+			return fmt.Errorf("[%s] Fail to gen model managed objects api, %s", tName, err)
+		}
 	}
 
 	return nil

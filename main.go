@@ -10,9 +10,10 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
-	"github.com/mijia/modelq/drivers"
-	"github.com/mijia/modelq/gmq"
+	"github.com/unei66/modelq/drivers"
+	"github.com/unei66/modelq/gmq"
 )
+var TypeNullMap=make(map[string]string)
 
 func main() {
 	var targetDb, tableNames, packageName string
@@ -66,6 +67,17 @@ func main() {
 		template:       tmplName,
 		structOnly:     structOnly,
 	}
+
+	TypeNullMap["string"]="sql.NullString"
+	TypeNullMap["int64"]="sql.NullInt64"
+	TypeNullMap["int32"]="sql.NullInt64"
+	TypeNullMap["int16"]="sql.NullInt64"
+	TypeNullMap["int8"]="sql.NullInt64"
+	TypeNullMap["int"]="sql.NullInt64"
+	TypeNullMap["bool"]="sql.NullBool"
+	TypeNullMap["float64"]="sql.NullFloat64"
+	TypeNullMap["time.Time"]="mysql.NullTime"
+
 	codeConfig.MustCompileTemplate()
 	generateModels(schemaName, dbSchema, *codeConfig)
 	formatCodes(packageName)

@@ -18,6 +18,13 @@ type Column struct {
 	IsNullable   string
 }
 
+func (c *Column) CanIsNull() bool {
+	if c.IsNullable == "YES" {
+		return true
+	}
+	return false
+}
+
 type TableSchema []Column
 type DbSchema map[string]TableSchema
 

@@ -10,7 +10,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/mijia/modelq/drivers"
+	"github.com/unei66/modelq/drivers"
 )
 
 type CodeResult struct {
@@ -89,7 +89,9 @@ func generateModels(dbName string, dbSchema drivers.DbSchema, config CodeConfig)
 	close(jobs)
 }
 
+
 func generateModel(dbName, tName string, schema drivers.TableSchema, config CodeConfig, tmpl *template.Template) error {
+
 	file, err := os.Create(path.Join(config.packageName, tName+".go"))
 	if err != nil {
 		return err
@@ -112,12 +114,23 @@ func generateModel(dbName, tName string, schema drivers.TableSchema, config Code
 	}
 	needTime := false
 	for i, col := range schema {
+		 var typ string
+		if col.CanIsNull() {
+			if t, ok := TypeNullMap[col.DataType]; !ok {
+				typ = col.DataType
+			} else {
+				typ = t
+			}
+		} else {
+			typ = col.DataType
+		}
+
 		field := ModelField{
 			Name:            toCapitalCase(col.ColumnName),
 			ColumnName:      col.ColumnName,
-			Type:            col.DataType,
+			Type:            typ,
 			IsNullable:      strings.ToUpper(col.IsNullable) == "YES",
-			JsonMeta:        fmt.Sprintf("`json:\"%s\"`", col.ColumnName),
+			DbMeta:          fmt.Sprintf("`db:\"%s\"`", col.ColumnName),
 			IsPrimaryKey:    strings.ToUpper(col.ColumnKey) == "PRI",
 			IsUniqueKey:     strings.ToUpper(col.ColumnKey) == "UNI",
 			IsIndexed:       strings.ToUpper(col.ColumnKey) == "MUL",
@@ -170,7 +183,7 @@ type ModelField struct {
 	Name            string
 	ColumnName      string
 	Type            string
-	JsonMeta        string
+	DbMeta          string
 	IsNullable      bool
 	IsPrimaryKey    bool
 	IsUniqueKey     bool
